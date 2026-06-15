@@ -2,526 +2,111 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Buscador de Fotos · Decoraciones Amarillas</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.2.0/dist/tabler-icons.min.css">
+<title>Buscador de Fotos</title>
+
+<!-- MSAL -->
+<script src="https://alcdn.msauth.net/browser/2.38.0/js/msal-browser.min.js"></script>
+
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#ffffff;--bg2:#f5f5f4;--bg3:#f0efec;
-  --text:#1a1a1a;--text2:#6b6b6b;--text3:#9e9e9e;
-  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
-  --info-bg:#e6f1fb;--info-text:#0c447c;
-  --success-bg:#eaf3de;--success-text:#27500a;
-  --warn-bg:#faeeda;--warn-text:#633806;
-  --danger-bg:#fcebeb;--danger-text:#791f1f;
-  --radius:8px;--radius-lg:12px;
-}
-@media(prefers-color-scheme:dark){
-  :root{
-    --bg:#1c1c1b;--bg2:#242423;--bg3:#2c2c2a;
-    --text:#f0efec;--text2:#b4b2a9;--text3:#888780;
-    --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.22);
-    --info-bg:#042c53;--info-text:#85b7eb;
-    --success-bg:#173404;--success-text:#c0dd97;
-    --warn-bg:#412402;--warn-text:#fac775;
-    --danger-bg:#501313;--danger-text:#f7c1c1;
-  }
-}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding:2rem 1rem}
-.container{max-width:960px;margin:0 auto}
-.header{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem}
-.logo{width:40px;height:40px;border-radius:var(--radius);background:var(--info-bg);display:flex;align-items:center;justify-content:center;color:var(--info-text);font-size:20px}
-.title{font-size:20px;font-weight:600;color:var(--text)}
-.subtitle{font-size:13px;color:var(--text2)}
-.card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1rem}
-.config-toggle{display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
-.config-toggle span{font-size:14px;font-weight:500;flex:1}
-.cfg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:1rem}
-.cfg-full{grid-column:1/-1}
-.cfg-label{font-size:12px;color:var(--text2);margin-bottom:4px}
-input[type=text],input[type=password],select{
-  width:100%;padding:7px 10px;border:0.5px solid var(--border);border-radius:var(--radius);
-  background:var(--bg);color:var(--text);font-size:13px;outline:none;
-}
-input:focus,select:focus{border-color:var(--border2);box-shadow:0 0 0 3px rgba(55,138,221,0.15)}
-button{
-  padding:8px 16px;border:0.5px solid var(--border2);border-radius:var(--radius);
-  background:transparent;color:var(--text);font-size:13px;cursor:pointer;
-  display:inline-flex;align-items:center;gap:6px;
-}
-button:hover{background:var(--bg2)}
-button:active{transform:scale(0.98)}
-.btn-primary{background:var(--info-bg);color:var(--info-text);border-color:var(--info-text);width:100%;justify-content:center;margin-top:10px;padding:10px;font-weight:500}
-.btn-primary:hover{opacity:.9;background:var(--info-bg)}
-
-/* Pasos de instrucción */
-.steps{counter-reset:step;list-style:none;margin:0;padding:0}
-.steps li{counter-increment:step;display:flex;gap:12px;margin-bottom:12px;align-items:flex-start}
-.steps li::before{content:counter(step);min-width:24px;height:24px;background:var(--info-bg);color:var(--info-text);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;margin-top:1px}
-.steps li p{font-size:13px;color:var(--text);line-height:1.5}
-.steps li code{background:var(--bg2);padding:2px 6px;border-radius:4px;font-size:12px;font-family:monospace}
-.step-title{font-size:14px;font-weight:500;margin-bottom:12px;color:var(--text)}
-.tab-row{display:flex;gap:4px;margin-bottom:1rem;border-bottom:0.5px solid var(--border)}
-.tab{padding:8px 16px;font-size:13px;border:none;border-radius:var(--radius) var(--radius) 0 0;background:transparent;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab.active{color:var(--info-text);border-bottom-color:var(--info-text);background:var(--info-bg)}
-.tab-content{display:none}
-.tab-content.active{display:block}
-
-.status{display:flex;align-items:center;gap:8px;font-size:13px;padding:10px 14px;border-radius:var(--radius);margin-bottom:1rem}
-.status.idle{background:var(--bg2);color:var(--text2)}
-.status.loading{background:var(--info-bg);color:var(--info-text)}
-.status.ok{background:var(--success-bg);color:var(--success-text)}
-.status.err{background:var(--danger-bg);color:var(--danger-text)}
-.filters{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:.75rem}
-.filter-label{font-size:12px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:4px}
-.pill{background:var(--bg2);border-radius:20px;padding:1px 7px;font-size:11px;color:var(--text3)}
-.toolbar{display:flex;align-items:center;gap:8px;margin-bottom:.75rem}
-.toolbar input{flex:1}
-.count{font-size:13px;color:var(--text2);flex:1}
-.view-btns{display:flex;gap:4px}
-.view-btn{padding:6px 8px}
-.view-btn.active{background:var(--bg2)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-.grid.list{grid-template-columns:1fr}
-.photo-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;transition:border-color .15s}
-.photo-card:hover{border-color:var(--border2)}
-.thumb{width:100%;aspect-ratio:4/3;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;color:var(--text3)}
-.thumb img{width:100%;height:100%;object-fit:cover}
-.photo-info{padding:8px 10px}
-.photo-id{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tags{display:flex;flex-wrap:wrap;gap:3px}
-.tag{font-size:10px;padding:2px 7px;border-radius:20px;white-space:nowrap}
-.tag.ev{background:#e1f5ee;color:#085041}
-.tag.tm{background:#fbeaf0;color:#72243e}
-.tag.cn{background:#faeeda;color:#633806}
-.photo-card.list{display:flex;align-items:center}
-.photo-card.list .thumb{width:90px;height:68px;aspect-ratio:unset;flex-shrink:0}
-.photo-card.list .photo-info{flex:1}
-.empty{text-align:center;padding:3rem;color:var(--text3);grid-column:1/-1}
-.empty i{font-size:40px;display:block;margin-bottom:.75rem}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:999;padding:1rem}
-.modal{background:var(--bg);border-radius:var(--radius-lg);border:0.5px solid var(--border);max-width:480px;width:100%;padding:1.25rem;position:relative;max-height:90vh;overflow-y:auto}
-.modal-close{position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:var(--text2);font-size:20px;padding:4px}
-.modal img{width:100%;border-radius:var(--radius);margin-bottom:1rem;max-height:300px;object-fit:contain;background:var(--bg2)}
-.modal-title{font-size:16px;font-weight:600;margin-bottom:.5rem}
-.modal-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
-.modal-link{font-size:13px;color:var(--info-text);display:inline-flex;align-items:center;gap:5px;text-decoration:none}
-.modal-link:hover{text-decoration:underline}
-.spinner{display:inline-block;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px}
-@keyframes spin{to{transform:rotate(360deg)}}
-.info-box{background:var(--warn-bg);color:var(--warn-text);border-radius:var(--radius);padding:10px 14px;font-size:13px;line-height:1.6;margin-bottom:1rem}
-.info-box b{font-weight:600}
-.copy-btn{font-size:12px;padding:4px 10px;margin-left:8px}
-pre{background:var(--bg2);padding:10px;border-radius:var(--radius);font-size:12px;overflow-x:auto;margin:8px 0;border:0.5px solid var(--border)}
-@media(max-width:600px){.filters{grid-template-columns:1fr}.cfg-grid{grid-template-columns:1fr}}
+body { font-family: Arial; padding:20px; }
+input, button { margin:5px; padding:8px; }
 </style>
 </head>
+
 <body>
-<div class="container">
 
-<div class="header">
-  <div class="logo"><i class="ti ti-photo"></i></div>
-  <div>
-    <div class="title">Buscador de Fotos</div>
-    <div class="subtitle">Decoraciones Amarillas · SharePoint</div>
-  </div>
-</div>
+<h2>Buscador de Fotos</h2>
 
-<!-- TABS -->
-<div class="tab-row">
-  <button class="tab active" onclick="showTab('tab-buscador',this)"><i class="ti ti-search" style="font-size:14px"></i> Buscador</button>
-  <button class="tab" onclick="showTab('tab-instrucciones',this)"><i class="ti ti-book" style="font-size:14px"></i> Cómo configurar</button>
-  <button class="tab" onclick="showTab('tab-token',this)"><i class="ti ti-key" style="font-size:14px"></i> Obtener token</button>
-</div>
+<h3>Configuración</h3>
+<label>Lista:</label>
+<input id="lista" value="Fotos"><br><br>
 
-<!-- TAB: BUSCADOR -->
-<div class="tab-content active" id="tab-buscador">
+<button onclick="login()">🔐 Iniciar sesión</button>
+<button onclick="cargarFotos()">📸 Cargar fotos</button>
 
-  <div class="card">
-    <div class="config-toggle" onclick="toggleCfg()">
-      <i class="ti ti-settings" style="color:var(--text3)"></i>
-      <span>Configuración de conexión</span>
-      <i class="ti ti-chevron-down" id="cfgChev" style="color:var(--text3)"></i>
-    </div>
-    <div id="cfgBody">
-      <div class="cfg-grid" style="margin-top:1rem">
-        <div>
-          <div class="cfg-label">Sitio SharePoint (subdominio)</div>
-          <input type="text" id="spSite" value="decoracionesamarillas">
-        </div>
-        <div>
-          <div class="cfg-label">Sitio (ruta /sites/...)</div>
-          <input type="text" id="spSitePath" value="General">
-        </div>
-        <div>
-          <div class="cfg-label">Nombre de la lista</div>
-          <input type="text" id="spList" value="Fotos">
-        </div>
-        <div>
-          <div class="cfg-label">Campo Título (interno)</div>
-          <input type="text" id="fTitulo" value="Title">
-        </div>
-        <div>
-          <div class="cfg-label">Campo Foto (interno)</div>
-          <input type="text" id="fFoto" value="Foto">
-        </div>
-        <div>
-          <div class="cfg-label">Campo Evento (interno)</div>
-          <input type="text" id="fEvento" value="Evento">
-        </div>
-        <div>
-          <div class="cfg-label">Campo Temática (interno)</div>
-          <input type="text" id="fTematica" value="Tematica">
-        </div>
-        <div>
-          <div class="cfg-label">Campo Contenido (interno)</div>
-          <input type="text" id="fContenido" value="Contenido">
-        </div>
-        <div class="cfg-full">
-          <div class="cfg-label">Token Bearer <span style="color:var(--text3)">(ver pestaña "Obtener token" si no funciona sin él)</span></div>
-          <input type="password" id="spToken" placeholder="Pega aquí el token si lo obtuviste de la consola del navegador">
-        </div>
-      </div>
-      <button class="btn-primary" onclick="conectar()">
-        <i class="ti ti-plug-connected"></i> Conectar y cargar fotos
-      </button>
-    </div>
-  </div>
-
-  <div class="status idle" id="statusBar">
-    <i class="ti ti-info-circle"></i>
-    <span id="statusMsg">Configura los datos y haz clic en "Conectar y cargar fotos"</span>
-  </div>
-
-  <div id="mainUI" style="display:none">
-    <div class="card">
-      <div class="filters">
-        <div>
-          <div class="filter-label">Evento <span class="pill" id="cntEv">0</span></div>
-          <select id="selEv" onchange="filtrar()"><option value="">Todos</option></select>
-        </div>
-        <div>
-          <div class="filter-label">Temática <span class="pill" id="cntTm">0</span></div>
-          <select id="selTm" onchange="filtrar()"><option value="">Todas</option></select>
-        </div>
-        <div>
-          <div class="filter-label">Contenido <span class="pill" id="cntCn">0</span></div>
-          <select id="selCn" onchange="filtrar()"><option value="">Todos</option></select>
-        </div>
-      </div>
-      <div class="toolbar">
-        <input type="text" id="searchTxt" placeholder="Buscar por título..." oninput="filtrar()">
-        <button onclick="limpiar()"><i class="ti ti-refresh"></i> Limpiar</button>
-        <span class="count" id="resCnt">0 fotos</span>
-        <div class="view-btns">
-          <button class="view-btn active" id="btnG" onclick="setView('grid')" title="Cuadrícula"><i class="ti ti-layout-grid"></i></button>
-          <button class="view-btn" id="btnL" onclick="setView('list')" title="Lista"><i class="ti ti-list"></i></button>
-        </div>
-      </div>
-    </div>
-    <div class="grid" id="photoGrid"></div>
-  </div>
-</div>
-
-<!-- TAB: INSTRUCCIONES -->
-<div class="tab-content" id="tab-instrucciones">
-  <div class="card">
-    <div class="step-title">¿Por qué da error "Failed to fetch"?</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">
-      SharePoint bloquea las peticiones que vienen de archivos locales (<code style="background:var(--bg2);padding:1px 5px;border-radius:4px">file://</code>) por seguridad (CORS). Para usar este buscador tienes <b>3 opciones</b>:
-    </p>
-    <div class="tab-row" style="margin-bottom:1rem">
-      <button class="tab active" onclick="showSubTab('opt1',this)" style="font-size:12px;padding:6px 12px">Opción 1 · Subir a SharePoint</button>
-      <button class="tab" onclick="showSubTab('opt2',this)" style="font-size:12px;padding:6px 12px">Opción 2 · Token manual</button>
-      <button class="tab" onclick="showSubTab('opt3',this)" style="font-size:12px;padding:6px 12px">Opción 3 · Power Automate</button>
-    </div>
-    <div id="opt1" class="tab-content active">
-      <ul class="steps">
-        <li><p>Ve a tu SharePoint → abre la biblioteca <b>Documentos</b> (o crea una carpeta llamada "Herramientas")</p></li>
-        <li><p>Sube el archivo <code>buscador_fotos_sharepoint.html</code> a esa biblioteca</p></li>
-        <li><p>Haz clic en el archivo → selecciona <b>Abrir en el navegador</b> (no "Descargar")</p></li>
-        <li><p>Al abrirse desde <code>decoracionesamarillas.sharepoint.com</code>, el CORS ya no bloquea nada y funciona automáticamente sin token</p></li>
-      </ul>
-      <div class="info-box" style="margin-top:1rem">
-        ✅ <b>Esta es la opción más fácil y recomendada.</b> Una vez subido, puedes compartir el link con tu equipo y todos podrán usarlo directamente.
-      </div>
-    </div>
-    <div id="opt2" class="tab-content">
-      <ul class="steps">
-        <li><p>Abre tu SharePoint en Edge o Chrome y entra a tu lista de Fotos</p></li>
-        <li><p>Presiona <b>F12</b> para abrir las herramientas de desarrollador</p></li>
-        <li><p>Ve a la pestaña <b>"Consola"</b> y pega el código que aparece en la pestaña <b>"Obtener token"</b></p></li>
-        <li><p>Copia el token que aparece y pégalo en el campo "Token Bearer" del buscador</p></li>
-        <li><p>El token dura ~1 hora. Después hay que renovarlo.</p></li>
-      </ul>
-    </div>
-    <div id="opt3" class="tab-content">
-      <p style="font-size:13px;color:var(--text2);line-height:1.6">
-        Si quieres una solución permanente sin tokens, podemos crear un <b>flujo de Power Automate</b> que exporte los datos de tu lista a un JSON en SharePoint cada X horas, y el buscador lee ese JSON estático. Sin autenticación, sin CORS. ¿Lo hacemos?
-      </p>
-      <button style="margin-top:1rem" onclick="sendPrompt('Quiero crear un flujo de Power Automate que exporte mi lista de Fotos de SharePoint a un archivo JSON para usarlo en el buscador')">
-        Sí, ayúdame con Power Automate ↗
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- TAB: TOKEN -->
-<div class="tab-content" id="tab-token">
-  <div class="card">
-    <div class="step-title">Obtener token de acceso desde el navegador</div>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.6">
-      Abre tu SharePoint en <b>Edge o Chrome</b>, presiona <b>F12</b>, ve a la pestaña <b>Consola</b> y pega este código:
-    </p>
-    <pre id="tokenCode">// Pega esto en la Consola (F12) de tu SharePoint:
-fetch("/_api/contextinfo", {
-  method: "POST",
-  headers: { "Accept": "application/json;odata=verbose" },
-  credentials: "include"
-})
-.then(r => r.json())
-.then(d => {
-  console.log("✅ Form Digest (úsalo como token):");
-  console.log(d.d.GetContextWebInformation.FormDigestValue);
-})
-.catch(e => console.error("Error:", e));</pre>
-    <button class="copy-btn" onclick="copiarToken()"><i class="ti ti-copy" style="font-size:13px"></i> Copiar código</button>
-    <div class="info-box" style="margin-top:1rem">
-      ⚠️ <b>Importante:</b> Este código solo funciona si lo ejecutas <b>estando dentro de</b> <code>decoracionesamarillas.sharepoint.com</code>. El valor que aparece en la consola es el token — cópialo y pégalo en el campo "Token Bearer" del buscador.
-    </div>
-    <p style="font-size:12px;color:var(--text3);margin-top:.5rem">El token expira en ~1 hora. Para uso recurrente, usa la Opción 1 (subir a SharePoint).</p>
-  </div>
-</div>
-
-</div>
-
-<!-- Modal -->
-<div class="overlay" id="modalOverlay" style="display:none" onclick="closeModal(event)">
-  <div class="modal" id="modalBox">
-    <button class="modal-close" onclick="document.getElementById('modalOverlay').style.display='none'"><i class="ti ti-x"></i></button>
-    <div id="modalContent"></div>
-  </div>
-</div>
+<h3>Resultado</h3>
+<div id="resultado"></div>
 
 <script>
-let items = [];
-let viewMode = 'grid';
-let cfgOpen = true;
 
-function showTab(id, btn){
-  document.querySelectorAll('.tab-row:first-of-type + .tab-content, .container > .tab-content').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.tab-row:first-of-type .tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
-// Override: target only top-level tabs
-document.querySelectorAll('.tab-row')[0].querySelectorAll('.tab').forEach(b=>{
-  b.onclick = function(){ showTopTab(this); };
-});
-function showTopTab(btn){
-  const tabs = ['tab-buscador','tab-instrucciones','tab-token'];
-  tabs.forEach(id=>document.getElementById(id).classList.remove('active'));
-  document.querySelectorAll('.tab-row')[0].querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  const idx = [...btn.parentElement.children].indexOf(btn);
-  document.getElementById(tabs[idx]).classList.add('active');
-}
-
-function showSubTab(id, btn){
-  ['opt1','opt2','opt3'].forEach(i=>{const el=document.getElementById(i);if(el)el.classList.remove('active');});
-  btn.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  btn.classList.add('active');
-}
-
-function toggleCfg(){
-  cfgOpen=!cfgOpen;
-  document.getElementById('cfgBody').style.display=cfgOpen?'':'none';
-  document.getElementById('cfgChev').className=cfgOpen?'ti ti-chevron-up':'ti ti-chevron-down';
-}
-
-function setStatus(type,msg,spin){
-  const bar=document.getElementById('statusBar');
-  bar.className='status '+type;
-  const ic={idle:'ti-info-circle',loading:'ti-loader',ok:'ti-circle-check',err:'ti-alert-circle'};
-  bar.innerHTML=spin?`<span class="spinner"></span><span>${msg}</span>`:`<i class="ti ${ic[type]||'ti-info-circle'}"></i><span>${msg}</span>`;
-}
-
-async function fetchAll(url,headers){
-  let all=[],next=url;
-  while(next){
-    const r=await fetch(next,{headers,credentials:'include'});
-    if(!r.ok) throw new Error(`HTTP ${r.status} — ${r.statusText}`);
-    const d=await r.json();
-    const res=d?.d?.results||d?.value||[];
-    all=all.concat(res);
-    next=d?.d?.__next||d?.['@odata.nextLink']||null;
+// 🔐 CONFIG AZURE (YA LISTO CON TUS DATOS)
+const msalConfig = {
+  auth: {
+    clientId: "16c752fe-553a-4b4c-b079-86a489b83a1d",
+    authority: "https://login.microsoftonline.com/42999c7e-96b0-41b8-ac79-28db3dfddcae",
+    redirectUri: "https://gentle-pond-02da37e10.7.azurestaticapps.net"
   }
-  return all;
+};
+
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+
+// LOGIN
+async function login() {
+  await msalInstance.loginPopup({
+    scopes: ["https://graph.microsoft.com/.default"]
+  });
+  alert("✅ Sesión iniciada");
 }
 
-async function conectar(){
-  const site=v('spSite'), path=v('spSitePath')||'General', list=v('spList');
-  const fT=v('fTitulo')||'Title', fF=v('fFoto')||'Foto';
-  const fE=v('fEvento')||'Evento', fTm=v('fTematica')||'Tematica', fC=v('fContenido')||'Contenido';
-  const token=v('spToken');
-
-  setStatus('loading','Conectando con SharePoint...',true);
-
-  const url=`https://${site}.sharepoint.com/sites/${path}/_api/web/lists/getbytitle('${encodeURIComponent(list)}')/items?$select=Id,${fT},${fF},${fE},${fTm},${fC}&$top=1000`;
-  const headers={'Accept':'application/json;odata=verbose'};
-  if(token) headers['Authorization']='Bearer '+token;
-
-  try{
-    const raw=await fetchAll(url,headers);
-    items=raw.map(it=>({
-      id:it.Id,
-      titulo:it[fT]||`F${String(it.Id).padStart(5,'0')}`,
-      foto:extraerFoto(it[fF]),
-      evento:it[fE]||'',
-      tematica:it[fTm]||'',
-      contenido:it[fC]||'',
-      spUrl:`https://${site}.sharepoint.com/sites/${path}/Lists/${encodeURIComponent(list)}/DispForm.aspx?ID=${it.Id}`
-    }));
-    setStatus('ok',`✓ ${items.length} fotos cargadas correctamente`);
-    buildFilters();
-    document.getElementById('mainUI').style.display='';
-    toggleCfg();
-    filtrar();
-  }catch(e){
-    const isFile=location.protocol==='file:';
-    const extra=isFile?' — <b>Abre el archivo desde SharePoint, no desde tu PC local</b> (ver pestaña "Cómo configurar")':'';
-    setStatus('err',`Error: ${e.message}${extra}`);
-  }
-}
-
-function extraerFoto(f){
-  if(!f) return null;
-  if(typeof f==='string'){
-    try{const j=JSON.parse(f);return (j.serverUrl||'')+j.serverRelativeUrl;}catch(e){}
-    if(f.startsWith('http')) return f;
+// OBTENER TOKEN
+async function getToken() {
+  const accounts = msalInstance.getAllAccounts();
+  if (accounts.length === 0) {
+    alert("Primero inicia sesión");
     return null;
   }
-  if(f.Url) return f.Url;
-  if(f.serverRelativeUrl) return f.serverRelativeUrl;
-  return null;
-}
 
-function v(id){return document.getElementById(id).value.trim();}
-function uniq(arr){return[...new Set(arr.filter(Boolean))].sort();}
-
-function buildFilters(){
-  const ev=uniq(items.map(i=>i.evento));
-  const tm=uniq(items.map(i=>i.tematica));
-  const cn=uniq(items.map(i=>i.contenido));
-  fill('selEv',ev,'Todos'); fill('selTm',tm,'Todas'); fill('selCn',cn,'Todos');
-  document.getElementById('cntEv').textContent=ev.length;
-  document.getElementById('cntTm').textContent=tm.length;
-  document.getElementById('cntCn').textContent=cn.length;
-}
-
-function fill(id,opts,allLabel){
-  const sel=document.getElementById(id),cur=sel.value;
-  sel.innerHTML=`<option value="">${allLabel}</option>`+opts.map(o=>`<option value="${h(o)}">${h(o)}</option>`).join('');
-  if(opts.includes(cur)) sel.value=cur;
-}
-
-function filtrar(){
-  const ev=document.getElementById('selEv').value;
-  const tm=document.getElementById('selTm').value;
-  const cn=document.getElementById('selCn').value;
-  const txt=document.getElementById('searchTxt').value.toLowerCase().trim();
-  let f=items.filter(i=>{
-    if(ev&&i.evento!==ev) return false;
-    if(tm&&i.tematica!==tm) return false;
-    if(cn&&i.contenido!==cn) return false;
-    if(txt&&!i.titulo.toLowerCase().includes(txt)) return false;
-    return true;
+  const response = await msalInstance.acquireTokenSilent({
+    account: accounts[0],
+    scopes: ["https://graph.microsoft.com/.default"]
   });
-  if(!ev){fill('selEv',uniq(f.map(i=>i.evento)),'Todos');document.getElementById('cntEv').textContent=uniq(f.map(i=>i.evento)).length;}
-  if(!tm){fill('selTm',uniq(f.map(i=>i.tematica)),'Todas');document.getElementById('cntTm').textContent=uniq(f.map(i=>i.tematica)).length;}
-  if(!cn){fill('selCn',uniq(f.map(i=>i.contenido)),'Todos');document.getElementById('cntCn').textContent=uniq(f.map(i=>i.contenido)).length;}
-  if(ev) document.getElementById('selEv').value=ev;
-  if(tm) document.getElementById('selTm').value=tm;
-  if(cn) document.getElementById('selCn').value=cn;
-  renderGrid(f);
+
+  return response.accessToken;
 }
 
-function limpiar(){
-  ['selEv','selTm','selCn'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('searchTxt').value='';
-  buildFilters(); filtrar();
-}
+// 📸 CARGAR FOTOS DESDE SHAREPOINT
+async function cargarFotos() {
 
-function renderGrid(f){
-  const grid=document.getElementById('photoGrid');
-  document.getElementById('resCnt').textContent=`${f.length} foto${f.length!==1?'s':''}`;
-  const isList=viewMode==='list';
-  grid.className='grid'+(isList?' list':'');
-  if(!f.length){
-    grid.innerHTML=`<div class="empty"><i class="ti ti-photo-off"></i>No se encontraron fotos con esos filtros</div>`;
-    return;
+  const token = await getToken();
+  if (!token) return;
+
+  const lista = document.getElementById("lista").value;
+
+  const url = `https://decoracionesamarillas.sharepoint.com/sites/General/_api/web/lists/getbytitle('${lista}')/items`;
+
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Accept": "application/json;odata=verbose"
+      }
+    });
+
+    const data = await res.json();
+
+    mostrar(data.d.results);
+
+  } catch (error) {
+    console.error(error);
+    alert("❌ Error al obtener datos");
   }
-  grid.innerHTML=f.map(item=>{
-    const img=item.foto?`<img src="${h(item.foto)}" alt="${h(item.titulo)}" loading="lazy" onerror="this.style.display='none'">`:`<i class="ti ti-photo" style="font-size:30px;opacity:.3"></i>`;
-    return `<div class="photo-card${isList?' list':''}" onclick="abrirModal(${item.id})">
-      <div class="thumb">${img}</div>
-      <div class="photo-info">
-        <div class="photo-id">${h(item.titulo)}</div>
-        <div class="tags">
-          ${item.evento?`<span class="tag ev">${h(item.evento)}</span>`:''}
-          ${item.tematica?`<span class="tag tm">${h(item.tematica)}</span>`:''}
-          ${item.contenido?`<span class="tag cn">${h(item.contenido)}</span>`:''}
-        </div>
-      </div>
+}
+
+// MOSTRAR RESULTADO
+function mostrar(items) {
+
+  let html = "";
+
+  items.forEach(item => {
+    html += `<div style="margin-bottom:10px;">
+      <b>${item.Title}</b><br>
     </div>`;
-  }).join('');
+  });
+
+  document.getElementById("resultado").innerHTML = html;
 }
 
-function setView(v2){
-  viewMode=v2;
-  document.getElementById('btnG').className='view-btn'+(v2==='grid'?' active':'');
-  document.getElementById('btnL').className='view-btn'+(v2==='list'?' active':'');
-  filtrar();
-}
-
-function abrirModal(id){
-  const item=items.find(i=>i.id===id);
-  if(!item) return;
-  document.getElementById('modalContent').innerHTML=`
-    ${item.foto?`<img src="${h(item.foto)}" alt="${h(item.titulo)}">`:'<div style="height:120px;background:var(--bg2);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;margin-bottom:1rem;color:var(--text3)"><i class="ti ti-photo" style="font-size:36px"></i></div>'}
-    <div class="modal-title">${h(item.titulo)}</div>
-    <div class="modal-tags">
-      ${item.evento?`<span class="tag ev">${h(item.evento)}</span>`:''}
-      ${item.tematica?`<span class="tag tm">${h(item.tematica)}</span>`:''}
-      ${item.contenido?`<span class="tag cn">${h(item.contenido)}</span>`:''}
-    </div>
-    <a class="modal-link" href="${h(item.spUrl)}" target="_blank" rel="noopener">
-      <i class="ti ti-external-link"></i> Ver elemento en SharePoint
-    </a>`;
-  document.getElementById('modalOverlay').style.display='flex';
-}
-
-function closeModal(e){if(e.target.id==='modalOverlay') document.getElementById('modalOverlay').style.display='none';}
-document.addEventListener('keydown',e=>{if(e.key==='Escape') document.getElementById('modalOverlay').style.display='none';});
-function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
-function copiarToken(){
-  const code=document.getElementById('tokenCode').innerText;
-  navigator.clipboard.writeText(code).then(()=>alert('Código copiado — pégalo en la Consola (F12) de SharePoint')).catch(()=>alert('Selecciona y copia el código manualmente'));
-}
-
-function sendPrompt(txt){
-  if(window.sendPrompt) window.sendPrompt(txt);
-  else alert('Usa este buscador dentro de Claude para acceder a esa función');
-}
-
-// Auto-detectar si se abre desde SharePoint
-if(location.hostname.includes('sharepoint.com')){
-  document.getElementById('statusBar').className='status ok';
-  document.getElementById('statusMsg').textContent='✓ Detectado: estás dentro de SharePoint. Haz clic en "Conectar y cargar fotos"';
-}
 </script>
+
 </body>
 </html>
